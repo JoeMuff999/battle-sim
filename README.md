@@ -1,0 +1,1 @@
+A battle simulator with Mount and Blade mechanics. Written in C++, graphics from SDL2
