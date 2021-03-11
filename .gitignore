@@ -1,3 +1,7 @@
-SDL2-2.0.14
+SDL2-2.0.14/docs
+SDL2-2.0.14/test
+SDL2-2.0.14/i686-w64-mingw32
+SDL2-2.0.14/Makefile
+
 .vscode
 *.exe
