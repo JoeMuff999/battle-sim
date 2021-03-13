@@ -1,52 +1,51 @@
 #include <iostream>
 #include <SDL.h>
 #include <stdio.h>
+#include "game.hpp"
+#include "graphics.hpp"
 using namespace std;
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+
 int main(int argc, char *args[])
 {
-    //The window we'll be rendering to
+
+    const int SCREEN_WIDTH = 640;
+    const int SCREEN_HEIGHT = 480;
+
     SDL_Window *window = NULL;
-
+    if (!initializeSDL(window, SCREEN_WIDTH, SCREEN_HEIGHT))
+    {
+        cout << "SDL window creation failed " << endl;
+        return 1;
+    }
     //The surface contained by the window
-    SDL_Surface *screenSurface = NULL;
+    SDL_Surface *screenSurface = SDL_GetWindowSurface(window);
+    //Fill the surface white
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
+    Game game(window, screenSurface);
+    game.test_game(300,200);
+    //Update the surface
+    SDL_UpdateWindowSurface(window);
+    SDL_Delay(2000);
+    game.cleanup();
+    SDL_UpdateWindowSurface(window);
 
-    //Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    bool quit = false;
+    while (!quit)
     {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-    }
-    else
-    {
-        window = SDL_CreateWindow("Battle Sim!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-        if (window == NULL)
+        SDL_Event e;
+        //Handle events on queue
+        while (SDL_PollEvent(&e) != 0)
         {
-            printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        }
-        else
-        {
-            //Get window surface
-            screenSurface = SDL_GetWindowSurface(window);
-
-            //Fill the surface white
-            SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-
-            //Update the surface
-            SDL_UpdateWindowSurface(window);
-
-            //Wait two seconds
-            // SDL_Delay(2000);
-
-            //Destroy window
-            // SDL_DestroyWindow(window);
-
-            //Quit SDL subsystems
-            // SDL_Quit();
+            //User requests quit
+            if (e.type == SDL_QUIT)
+            {
+                quit = true;
+            }
         }
     }
+    shutdownSDL(window);
     cout << "hello world" << endl;
     return 0;
 }
