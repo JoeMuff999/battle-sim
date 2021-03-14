@@ -2,6 +2,7 @@
 #include <chrono>
 #include <ctime>
 #include <thread>
+#include <SDL.h>
 
 #ifndef TIME_HPP
 #define TIME_HPP
@@ -33,6 +34,7 @@ namespace Time
     {
         int intSleepTime = static_cast<int>(floatSleepTime);
         std::this_thread::sleep_for(std::chrono::milliseconds(intSleepTime));
+        // SDL_Delay(intSleepTime);
     }
 }
 #endif

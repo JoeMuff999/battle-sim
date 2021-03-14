@@ -1,5 +1,7 @@
 #include "point.hpp"
 #include "drawable.hpp"
+#include "controllable.hpp"
+
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
@@ -14,16 +16,16 @@ public:
     Point _position;
     Point _target;
     floatPoint _truePosition;
-    float movementSpeed = 10.0f;
+    float movementSpeed = 100.0f;
     queue<Point> path;
 
 public:
     Agent(int x, int y)
     {
-        _position.x = x;
-        _position.y = y;
+        _position ={x,y};
         _truePosition.x = x;
         _truePosition.y = y;
+        _target = {x, y};
     }
     const std::string getImgPath()
     {
@@ -41,20 +43,18 @@ public:
     //should update the agent's internal position
     void updateAgent(const float frameDeltaTime)
     {
-        // if(path.empty())
-        //     return;
-
         float totalMovementForThisFrame = movementSpeed * frameDeltaTime;
 
-        float x = 0 - _truePosition.x;
-        float y = 0 - _truePosition.y;
+        float x = _target.x - _truePosition.x;
+        float y = _target.y - _truePosition.y;
         float xx = x*x;
         float yy = y*y;
 
         float mag = sqrt(xx+yy);
         if(mag < 1)
         {
-            cout << "reached target " <<endl;
+            // setTarget(1.2*_position.x, 1.2*_position.y);
+            // cout << "reached target "<<endl;
             return;
         }
 
@@ -69,11 +69,39 @@ public:
         _position.x = (int)_truePosition.x;
         _position.y = (int)_truePosition.y;
     }
-
+    void setTarget(int x, int y)
+    {
+        _target = {x,y};
+    }
     //A*
     void pathToPoint()
     {
+
     }
+};
+
+class PlayerAgent : public Agent, public Controllable
+{
+    string bmp_path = "/sprites/agent.bmp";
+public:        
+    PlayerAgent(int x, int y) : Agent(x, y) {}
+
+    void handleInput(SDL_Event& e, Point& mousePosition)
+    {
+        setTarget(mousePosition.x, mousePosition.y);
+    }
+
+    const std::string getImgPath()
+    {
+        char cwd[FILENAME_MAX];
+        getcwd(cwd, FILENAME_MAX);
+
+        std::string currDir(cwd);
+        currDir += bmp_path;
+
+        return currDir;
+    }
+    
 };
 
 class FriendlyAgent : public Agent
@@ -89,8 +117,8 @@ public:
 
         std::string currDir(cwd);
         currDir += bmp_path;
-        // cout << "in img path " << currDir <<  " size = " << currDir.size() <<endl;
 
         return currDir;
     }
+
 };

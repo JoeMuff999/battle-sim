@@ -1,0 +1,2 @@
+make some sort of ECS? agents are raw pointers at the moment, potentially use unique_ptr or something
+path planning, A*

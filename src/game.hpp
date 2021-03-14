@@ -5,11 +5,14 @@
 #include "agent.hpp"
 #include "graphics.hpp"
 #include "time.hpp"
+#include "InputManager.hpp"
 class Game
 {
     SDL_Window *_gameWindow;
     SDL_Surface *_mainSurface;
-    vector<Agent> agents;
+    vector<Agent*> agents;
+    vector<Drawable*> drawables;
+    vector<Controllable*> controllables;
 
 public:
     Game(SDL_Window *&gameWindow, SDL_Surface *&mainSurface)
@@ -21,62 +24,52 @@ public:
     //initialize all of the gameobjects, do drawing, etc
     void start()
     {
-        FriendlyAgent fagent(300,200);
+        PlayerAgent* fagent = new PlayerAgent(300,200);
         agents.push_back(fagent);
-        fagent.initializeSprite();
-        fagent.drawToScreen(_mainSurface);
+        drawables.push_back(fagent);
+        controllables.push_back(fagent);
+        fagent->initializeSprite();
+        fagent->drawToScreen(_mainSurface);
     }
 
     void mainLoop()
     {
+        bool quit = false;
         //read 1 input per frame, update player then update the agents then update graphics
-        Time::sleepForMilliseconds(Time::MS_PER_FRAME);
-        std::chrono::_V2::steady_clock::time_point lastFrameStartTime = Time::getTime();
-        while (true)
+        using namespace std::chrono::_V2;
+        steady_clock::time_point lastFrameStartTime = Time::getTime();
+        while (!quit)
         {
-            std::chrono::_V2::steady_clock::time_point startTime = Time::getTime();
+            steady_clock::time_point startTime = Time::getTime();
             const float frameDeltaTime = Time::getTimeBetween(startTime, lastFrameStartTime);
             SDL_Event e;
             //Handle events on queue
-            if(SDL_PollEvent(&e) != 0)
-            {
-                //User requests quit
-                if(e.type == SDL_QUIT)
-                {
-                    cout << "QUITTING " <<endl;
-                    break;
-                }
-            }
+            if(!InputManager::handleInput(controllables))
+                break;
+            
+
             update(frameDeltaTime);
 
             const float frameTimeSoFar = Time::getElapsedTime(startTime)*1000;
             Time::sleepForMilliseconds(Time::MS_PER_FRAME - frameTimeSoFar);
-            // cout << "new frame " << frameTimeSoFar << endl;
             lastFrameStartTime = startTime;
         }
+        cleanup();
         shutdownSDL(_gameWindow);
     }
     //record time at the start of the frame
     void update(const float previousFrameStartTime)
-    {
-        // for (int i = 0; i < agents.size(); i++)
-        // {
-        //     agents[i].updateAgent(previousFrameStartTime);
-        // }
+    {        
         //update agents
-        for(Agent& agent : agents)
+        for(Agent* agent : agents)
         {
-            agent.updateAgent(previousFrameStartTime);
+            agent->updateAgent(previousFrameStartTime);
         }
-        // update graphics
-        for(Agent& agent : agents)
+        //update graphics
+        for(Drawable* drawable : drawables)
         {
-            agent.updateSprite();
+            drawable->updateSprite(_mainSurface);
         }
-        // for(int i = 0; i < agents.size(); i++)
-        // {
-        //     agents[i].updateSprite();
-        // }
         SDL_UpdateWindowSurface(_gameWindow);
     }
 
@@ -84,7 +77,7 @@ public:
     {
         for (int i = 0; i < agents.size(); i++)
         {
-            agents[i].cleanupSprite();
+            agents[i]->cleanupSprite();
         }
     }
 };
