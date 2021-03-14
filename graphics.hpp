@@ -3,6 +3,10 @@
 */
 #include <SDL.h>
 #include <iostream>
+
+#ifndef GRAPHICS_HPP
+#define GRAPHICS_HPP
+
 using namespace std;
 bool initializeSDL(SDL_Window*& window, const int SCREEN_WIDTH, const int SCREEN_HEIGHT)
 {
@@ -36,3 +40,5 @@ bool shutdownSDL(SDL_Window* window)
     // Quit SDL subsystems
     SDL_Quit();
 }
+
+#endif

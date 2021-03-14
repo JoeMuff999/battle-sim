@@ -4,7 +4,7 @@ LIBS = -L$(SDL2_PATH)/lib -lmingw32 -lSDL2main -lSDL2
 # -I defines where to look for the headers
 INCLUDE = -I$(SDL2_PATH)/include/SDL2
 # src files
-SRC = main.cpp game.hpp point.hpp agent.hpp 
+SRC = main.cpp game.hpp point.hpp agent.hpp time.hpp drawable.hpp graphics.hpp
 # -c says, hey man don't link these files, since this will lead to multiple definitions if we link again in the next step
 all:
 	g++ -o run_game main.cpp $(INCLUDE) $(LIBS)

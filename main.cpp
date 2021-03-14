@@ -24,28 +24,11 @@ int main(int argc, char *args[])
     //Fill the surface white
     SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
     Game game(window, screenSurface);
-    game.test_game(300,200);
     //Update the surface
     SDL_UpdateWindowSurface(window);
-    SDL_Delay(2000);
-    game.cleanup();
-    SDL_UpdateWindowSurface(window);
+    game.start();
+    game.mainLoop();
 
-    bool quit = false;
-    while (!quit)
-    {
-        SDL_Event e;
-        //Handle events on queue
-        while (SDL_PollEvent(&e) != 0)
-        {
-            //User requests quit
-            if (e.type == SDL_QUIT)
-            {
-                quit = true;
-            }
-        }
-    }
-    shutdownSDL(window);
     cout << "hello world" << endl;
     return 0;
 }

@@ -11,6 +11,13 @@ struct point{
 
 typedef struct point Point;
 
+struct floatPoint{
+    float x;
+    float y;
+};
+
+typedef struct floatPoint FloatPoint;
+
 Point point(int xx, int yy)
 {
     Point p;
