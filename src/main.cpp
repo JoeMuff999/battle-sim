@@ -29,6 +29,5 @@ int main(int argc, char *args[])
     game.start();
     game.mainLoop();
 
-    cout << "hello world" << endl;
     return 0;
 }

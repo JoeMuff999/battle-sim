@@ -15,9 +15,7 @@ class Drawable{
         void initializeSprite()
         {   
             std::string tmp = getImgPath();
-            cout << tmp <<endl;
             image = SDL_LoadBMP(tmp.c_str());   
-
         }
 
         void updateSprite(SDL_Surface*& mainSurface)

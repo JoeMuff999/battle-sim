@@ -16,8 +16,7 @@ public:
     Point _position;
     Point _target;
     floatPoint _truePosition;
-    float movementSpeed = 100.0f;
-    queue<Point> path;
+    float _movementSpeed = 100.0f;
 
 public:
     Agent(int x, int y)
@@ -26,6 +25,15 @@ public:
         _truePosition.x = x;
         _truePosition.y = y;
         _target = {x, y};
+    }
+    Agent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore)
+    {
+        _position ={x,y};
+        _truePosition.x = x;
+        _truePosition.y = y;
+        _target = {x, y};
+        agentStore.push_back(this);
+        drawableStore.push_back(this);
     }
     const std::string getImgPath()
     {
@@ -41,9 +49,21 @@ public:
         _position = point;
     }
     //should update the agent's internal position
-    void updateAgent(const float frameDeltaTime)
+    virtual void updateAgent(const float frameDeltaTime)
     {
-        float totalMovementForThisFrame = movementSpeed * frameDeltaTime;
+        pathToTarget(frameDeltaTime);
+    }
+    /*
+        allow derived classes to define their own movement speed
+    */
+    virtual float getMoveSpeed()
+    {
+        return _movementSpeed;
+    }
+
+    void pathToTarget(const float frameDeltaTime)
+    {
+        float totalMovementForThisFrame = getMoveSpeed() * frameDeltaTime;
 
         float x = _target.x - _truePosition.x;
         float y = _target.y - _truePosition.y;
@@ -51,10 +71,9 @@ public:
         float yy = y*y;
 
         float mag = sqrt(xx+yy);
-        if(mag < 1)
+        if(mag < totalMovementForThisFrame)
         {
-            // setTarget(1.2*_position.x, 1.2*_position.y);
-            // cout << "reached target "<<endl;
+
             return;
         }
 
@@ -69,6 +88,7 @@ public:
         _position.x = (int)_truePosition.x;
         _position.y = (int)_truePosition.y;
     }
+
     void setTarget(int x, int y)
     {
         _target = {x,y};
@@ -83,8 +103,23 @@ public:
 class PlayerAgent : public Agent, public Controllable
 {
     string bmp_path = "/sprites/agent.bmp";
+    float _movementSpeed = 200.0f;
 public:        
-    PlayerAgent(int x, int y) : Agent(x, y) {}
+    PlayerAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
+        controllables.push_back(this);
+        agentStore.push_back(this);
+        drawableStore.push_back(this);
+    }
+
+    float getMoveSpeed()
+    {
+        return _movementSpeed;
+    }
+
+    void updateAgent(const float frameDeltaTime)
+    {
+        Agent::updateAgent(frameDeltaTime);
+    }
 
     void handleInput(SDL_Event& e, Point& mousePosition)
     {
@@ -107,8 +142,12 @@ public:
 class FriendlyAgent : public Agent
 {
     string bmp_path = "/sprites/agent.bmp";
+    Agent* _toFollow;
 public:        
-    FriendlyAgent(int x, int y) : Agent(x, y) {}
+    FriendlyAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore) : Agent(x, y) {
+        agentStore.push_back(this);
+        drawableStore.push_back(this);
+    }
 
     const std::string getImgPath()
     {
@@ -120,5 +159,19 @@ public:
 
         return currDir;
     }
+    /*
+        TODO: smart pointer please :)
+    */
+    void setTargetAgent(Agent* toFollow)
+    {
+        _toFollow = toFollow;
+    }
+    //override: behavior should be following the player, although this will eventually be more in-depth.
+    void updateAgent(const float frameDeltaTime)
+    {
+        Point targetAgentPos = _toFollow->getPos();
+        setTarget(targetAgentPos.x, targetAgentPos.y);
+        pathToTarget(frameDeltaTime);
+    }   
 
 };

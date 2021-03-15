@@ -1,2 +1,16 @@
 make some sort of ECS? agents are raw pointers at the moment, potentially use unique_ptr or something
+potentially a boid simulation 
+make friendly agents follow player agent check!
+make initial state serializable. json? 
+
+terrain, static objects, rendering optimizations
+
+proximity detection with enemies and friendlys
+
+utilities associated with states
+
+how do we do utilities for non discrete states? potentially each state has a set of values? like risk-style combat where sheer numbers wins? this would incentivize them to stay together. i really need to discretize the states though because its impossible to plan in a continuous environment. 
+
+
 path planning, A*
+maximization planning, expectimax? again, don't we need to discretize states

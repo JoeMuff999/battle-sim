@@ -18,12 +18,4 @@ struct floatPoint{
 
 typedef struct floatPoint FloatPoint;
 
-// Point point(int xx, int yy)
-// {
-//     Point p;
-//     p.x = xx;
-//     p.y = yy;
-//     return p;
-// }
-
 #endif

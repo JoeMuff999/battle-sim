@@ -24,10 +24,11 @@ public:
     //initialize all of the gameobjects, do drawing, etc
     void start()
     {
-        PlayerAgent* fagent = new PlayerAgent(300,200);
-        agents.push_back(fagent);
-        drawables.push_back(fagent);
-        controllables.push_back(fagent);
+        PlayerAgent* pagent = new PlayerAgent(300,200, agents, drawables, controllables);
+        pagent->initializeSprite();
+        pagent->drawToScreen(_mainSurface);
+        FriendlyAgent* fagent = new FriendlyAgent(100,200, agents, drawables);
+        fagent->setTargetAgent(pagent);
         fagent->initializeSprite();
         fagent->drawToScreen(_mainSurface);
     }
