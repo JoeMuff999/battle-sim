@@ -12,7 +12,7 @@
 */
 class Agent : public Drawable
 {
-public:
+protected:
     Point _position;
     Point _target;
     floatPoint _truePosition;
@@ -102,7 +102,7 @@ public:
 
 class PlayerAgent : public Agent, public Controllable
 {
-    string bmp_path = "/sprites/agent.bmp";
+    string bmp_path = "/sprites/player_agent.bmp";
     float _movementSpeed = 200.0f;
 public:        
     PlayerAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
@@ -141,7 +141,7 @@ public:
 
 class FriendlyAgent : public Agent
 {
-    string bmp_path = "/sprites/agent.bmp";
+    string bmp_path = "/sprites/friendly_agent.bmp";
     Agent* _toFollow;
 public:        
     FriendlyAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore) : Agent(x, y) {

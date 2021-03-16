@@ -1,6 +1,7 @@
 #include "point.hpp"
 #include <SDL.h>
 #include <iostream>
+#include "graphics.hpp"
 using namespace std;
 class Drawable{
 
@@ -12,18 +13,18 @@ class Drawable{
 
         virtual Point getPos() = 0; //force consistency between graphics position and entity position
 
-        void initializeSprite()
+        void initializeSprite(const SDL_Surface* _mainSurface)
         {   
             std::string tmp = getImgPath();
-            image = SDL_LoadBMP(tmp.c_str());   
+            image = Graphics::loadSurface(_mainSurface, tmp);
         }
 
         void updateSprite(SDL_Surface*& mainSurface)
         {
             Point currPoint = getPos();
             // cout << "accessed position " << spriteRect.y <<endl;
-            Uint32 white = 0xffffffff;
-            SDL_FillRect(mainSurface, &spriteRect, white);    
+            // Uint32 white = 0xffffffff;
+            // SDL_FillRect(mainSurface, &spriteRect, white);    
 
             spriteRect.x = currPoint.x;
             spriteRect.y = currPoint.y;

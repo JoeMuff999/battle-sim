@@ -14,3 +14,10 @@ how do we do utilities for non discrete states? potentially each state has a set
 
 path planning, A*
 maximization planning, expectimax? again, don't we need to discretize states
+
+vision, as in like which direction the agent is facing is the information it recieves
+have control for agents be determined by the agent itself. proximity, vision, etc...
+
+at the moment, we are leaking memory like crazy lol
+
+use pngs instead of bitmaps

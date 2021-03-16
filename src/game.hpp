@@ -11,7 +11,8 @@ class Game
     SDL_Window *_gameWindow;
     SDL_Surface *_mainSurface;
     vector<Agent*> agents;
-    vector<Drawable*> drawables;
+    vector<Drawable*> topLayerDrawables;
+    vector<Drawable*> bottomLayerDrawables;
     vector<Controllable*> controllables;
 
 public:
@@ -24,12 +25,12 @@ public:
     //initialize all of the gameobjects, do drawing, etc
     void start()
     {
-        PlayerAgent* pagent = new PlayerAgent(300,200, agents, drawables, controllables);
-        pagent->initializeSprite();
+        PlayerAgent* pagent = new PlayerAgent(300,200, agents, topLayerDrawables, controllables);
+        pagent->initializeSprite(_mainSurface);
         pagent->drawToScreen(_mainSurface);
-        FriendlyAgent* fagent = new FriendlyAgent(100,200, agents, drawables);
+        FriendlyAgent* fagent = new FriendlyAgent(100,200, agents, bottomLayerDrawables);
         fagent->setTargetAgent(pagent);
-        fagent->initializeSprite();
+        fagent->initializeSprite(_mainSurface);
         fagent->drawToScreen(_mainSurface);
     }
 
@@ -56,7 +57,7 @@ public:
             lastFrameStartTime = startTime;
         }
         cleanup();
-        shutdownSDL(_gameWindow);
+        Graphics::shutdownSDL(_gameWindow);
     }
     //record time at the start of the frame
     void update(const float previousFrameStartTime)
@@ -66,8 +67,14 @@ public:
         {
             agent->updateAgent(previousFrameStartTime);
         }
+    SDL_FillRect(_mainSurface, NULL, SDL_MapRGB(_mainSurface->format, 0x77, 0x77, 0x77));
+
         //update graphics
-        for(Drawable* drawable : drawables)
+        for(Drawable* drawable : bottomLayerDrawables)
+        {
+            drawable->updateSprite(_mainSurface);
+        }
+        for(Drawable* drawable : topLayerDrawables)
         {
             drawable->updateSprite(_mainSurface);
         }
