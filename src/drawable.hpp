@@ -2,7 +2,12 @@
 #include <SDL.h>
 #include <iostream>
 #include "graphics.hpp"
+
+#ifndef DRAWABLE_HPP
+#define DRAWABLE_HPP
+
 using namespace std;
+
 class Drawable{
 
     SDL_Surface* image = NULL;
@@ -59,3 +64,5 @@ class Drawable{
         }
         
 };
+
+#endif

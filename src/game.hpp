@@ -6,6 +6,10 @@
 #include "graphics.hpp"
 #include "time.hpp"
 #include "InputManager.hpp"
+
+#ifndef GAME_HPP
+#define GAME_HPP
+
 class Game
 {
     SDL_Window *_gameWindow;
@@ -67,7 +71,7 @@ public:
         {
             agent->updateAgent(previousFrameStartTime);
         }
-    SDL_FillRect(_mainSurface, NULL, SDL_MapRGB(_mainSurface->format, 0x77, 0x77, 0x77));
+        SDL_FillRect(_mainSurface, NULL, SDL_MapRGB(_mainSurface->format, 0x77, 0x77, 0x77));
 
         //update graphics
         for(Drawable* drawable : bottomLayerDrawables)
@@ -89,3 +93,5 @@ public:
         }
     }
 };
+
+#endif
