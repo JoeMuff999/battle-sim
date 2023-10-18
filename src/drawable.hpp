@@ -2,79 +2,166 @@
 #include <SDL.h>
 #include <iostream>
 #include "graphics.hpp"
+#include "pathHelper.hpp"
+#include <map>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #ifndef DRAWABLE_HPP
 #define DRAWABLE_HPP
 
 using namespace std;
 
-class Drawable {
+struct configRow
+{
+    string name;
+    string pathToImage;
+    string numFrames;
+};
 
-    SDL_Surface* image = NULL;
-    int m_rows = 0;
-    int m_columns = 0;
-    Point m_currentFrame = {0,0};
-    SDL_Rect m_clip;
-    
+typedef struct configRow ConfigRow;
 
-    public:
+struct imageData
+{
+    string name;
+    int numFrames;
+    SDL_Rect clip;
+    SDL_Surface *image;
+};
+typedef struct imageData ImageData;
+
+class Drawable
+{
+
+    ImageData currentImage;
+    Point m_currentFrame = {0, 0};
+
+    map<string, ImageData> mapStateToImage;
+
+public:
     SDL_Rect spriteRect;
 
-        virtual const string getImgPath() = 0;
+    virtual const string getImageConfigPath() = 0;
 
-        virtual Point getPos() = 0; //force consistency between graphics position and entity position
+    virtual Point getPos() = 0; // force consistency between graphics position and entity position
 
-        void initializeSprite(const SDL_Surface* _mainSurface, int _rows, int _columns)
-        {   
-            std::string tmp = getImgPath();
-            image = Graphics::loadSurface(_mainSurface, tmp);
+    void initializeSprite(const SDL_Surface *_mainSurface)
+    {
+        string tmp = getImageConfigPath();
+        vector<ConfigRow> config = parseConfig(tmp);
 
-            if(image == NULL)
+        for (ConfigRow configRow : config)
+        {
+            SDL_Surface *image = Graphics::loadSurface(_mainSurface, configRow.pathToImage);
+            if (image == NULL)
             {
-                cout << "Drawable not initialized! img path = "<< getImgPath() << " error = " << SDL_GetError() << endl;
+                cout << "Drawable not initialized! img path = " << configRow.pathToImage << " error = " << SDL_GetError() << endl;
                 return;
             }
-
-            m_clip.h = image->h / _rows;
-            m_clip.w = image->w / _columns;
-
-            m_rows = _rows;
-            m_columns = _columns;
-
-            spriteRect = {0, 0, image->w, image->h};
+            ImageData _imageData;
+            _imageData.image = image;
+            _imageData.name = configRow.name;
+            _imageData.numFrames = stoi(configRow.numFrames);
+            _imageData.clip.h = image->h / 1;
+            _imageData.clip.w = image->w / _imageData.numFrames;
+            mapStateToImage[configRow.name] = _imageData;
         }
+        //TODO: set the default state in a generic way
+        setState("Idle");
+    }
 
-        void updateSprite(SDL_Surface*& mainSurface)
+    void updateSprite(SDL_Surface *&mainSurface)
+    {
+        drawToScreen(mainSurface);
+    }
+
+    void drawToScreen(SDL_Surface *&mainSurface)
+    {
+        Point currPoint = getPos();
+        m_currentFrame.x += 1;
+        m_currentFrame.y += 1;
+        if (m_currentFrame.y >= 1)
         {
-           drawToScreen(mainSurface);
+            m_currentFrame.y = 0;
         }
-
-        void drawToScreen(SDL_Surface*& mainSurface)
+        if (m_currentFrame.x >= currentImage.numFrames)
         {
-            Point currPoint = getPos();
-            m_currentFrame.x += 1;
-            m_currentFrame.y += 1;
-            if (m_currentFrame.y >= m_rows) {
-                m_currentFrame.y = 0;
-            }
-            if (m_currentFrame.x >= m_columns) {
-                m_currentFrame.x = 0;
-            }
-
-            m_clip.x = m_currentFrame.x * m_clip.w;
-            m_clip.y = m_currentFrame.y * m_clip.h;
-
-            spriteRect.x = currPoint.x;
-            spriteRect.y = currPoint.y;
-            SDL_BlitSurface(image, &m_clip, mainSurface, &spriteRect);    
+            m_currentFrame.x = 0;
         }
 
-        void cleanupSprite()
+        currentImage.clip.x = m_currentFrame.x * currentImage.clip.w;
+        currentImage.clip.y = m_currentFrame.y * currentImage.clip.h;
+
+        spriteRect.x = currPoint.x;
+        spriteRect.y = currPoint.y;
+        spriteRect.h = currentImage.image->h;
+        spriteRect.w = currentImage.image->w;
+
+        int ret = SDL_BlitSurface(currentImage.image, &currentImage.clip, mainSurface, &spriteRect);
+        if (ret == -1) {
+            cout << "Failed to display drawable: " << SDL_GetError() << endl;
+        }
+    }
+
+    void setState(string state)
+    {
+        //check if state exists first
+        auto item = mapStateToImage.find(state);
+
+        if (item == mapStateToImage.end())
         {
-            SDL_FreeSurface(image);
-            image = NULL;
+            std::cout << "Key " << state << " does not exist." << std::endl;
+            return;
         }
-        
+
+        currentImage = mapStateToImage[state];
+    }
+
+    vector<ConfigRow> parseConfig(const string &pathToConfig)
+    {
+        vector<ConfigRow> data;
+        ifstream file(pathToConfig);
+
+        if (!file.is_open())
+        {
+            cerr << "Failed to open the file." << endl;
+            return data;
+        }
+
+        string line;
+        string cell;
+
+        // Read and discard the header row if it exists.
+        getline(file, line);
+
+        while (getline(file, line))
+        {
+            istringstream lineStream(line);
+            ConfigRow row;
+
+            // Parse each cell in the row using ',' as the delimiter.
+            getline(lineStream, row.name, ',');
+            getline(lineStream, row.pathToImage, ',');
+            getline(lineStream, row.numFrames, ',');
+            // Add more lines for additional columns as needed.
+
+            row.pathToImage = PathHelper::generatePath(row.pathToImage);
+
+            data.push_back(row);
+        }
+
+        file.close();
+        return data;
+    }
+
+    void cleanupSprite()
+    {
+        for (const auto& pair : mapStateToImage) {
+            SDL_FreeSurface(pair.second.image);
+        }
+    }
 };
 
 #endif

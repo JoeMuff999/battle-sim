@@ -1,6 +1,7 @@
 #include "point.hpp"
 #include "drawable.hpp"
 #include "controllable.hpp"
+#include "pathHelper.hpp"
 
 #include <string>
 #include <stdio.h>
@@ -9,17 +10,6 @@
 /*
     base class from which all other agents inherit their functions
 */
-
-#ifdef _WIN32
-// Windows-specific headers
-#include <direct.h>
-#define GetCurrentDir _getcwd
-#else
-// Linux-specific headers
-#include <unistd.h>
-#include <limits.h>
-#define GetCurrentDir getcwd
-#endif
 
 #ifndef AGENT_HPP
 #define AGENT_HPP
@@ -49,7 +39,7 @@ public:
         agentStore.push_back(this);
         drawableStore.push_back(this);
     }
-    const std::string getImgPath()
+    const std::string getImageConfigPath()
     {
         string dummy;
         return dummy;
@@ -90,7 +80,7 @@ public:
 
 class PlayerAgent : public Agent, public Controllable
 {
-    string bmp_path = "/sprites/Idle.bmp";
+    string cfg_path = "/config/warrior";
     float _movementSpeed = 200.0f;
 public:        
     PlayerAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
@@ -114,22 +104,16 @@ public:
         setTarget(mousePosition.x, mousePosition.y);
     }
 
-    const std::string getImgPath() override
+    const std::string getImageConfigPath() override
     {
-        char cwd[FILENAME_MAX];
-		GetCurrentDir(cwd, FILENAME_MAX);
-
-        std::string currDir(cwd);
-        currDir += bmp_path;
-
-        return currDir;
+        return PathHelper::generatePath(cfg_path);
     }
     
 };
 
 class FlockingAgent : public Agent
 {
-    string bmp_path = "/sprites/Walk.bmp";
+    string cfg_path = "/config/warrior";
     //smart pointer please :)
     vector<Agent*>* _agents;
     float _heading;
@@ -142,15 +126,9 @@ public:
         _heading = 0.0f;
     }
 
-    const std::string getImgPath() override
+    const std::string getImageConfigPath() override
     {
-        char cwd[FILENAME_MAX];
-		GetCurrentDir(cwd, FILENAME_MAX);
-
-        std::string currDir(cwd);
-        currDir += bmp_path;
-
-        return currDir;
+        return PathHelper::generatePath(cfg_path);
     }
     /*
         TODO: smart pointer please :)

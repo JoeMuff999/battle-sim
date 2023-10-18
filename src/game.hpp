@@ -30,10 +30,10 @@ public:
     void start()
     {
         PlayerAgent* pagent = new PlayerAgent(300,200, agents, topLayerDrawables, controllables);
-        pagent->initializeSprite(_mainSurface, 1, 6);
+        pagent->initializeSprite(_mainSurface);
         pagent->drawToScreen(_mainSurface);
         FlockingAgent* fagent = new FlockingAgent(100,200, agents, bottomLayerDrawables);
-        fagent->initializeSprite(_mainSurface, 1, 8);
+        fagent->initializeSprite(_mainSurface);
         fagent->drawToScreen(_mainSurface);
     }
 

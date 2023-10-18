@@ -12,8 +12,12 @@ void Agent::pathToTarget(const float frameDeltaTime)
     float mag = sqrt(xx + yy);
     if (mag < totalMovementForThisFrame)
     {
+        setState("Idle");
         return;
     }
+    //NOTE: this should be moved
+    setState("Walk");
+   
 
     float x_norm = x / mag;
     float y_norm = y / mag;
