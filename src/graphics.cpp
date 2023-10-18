@@ -61,4 +61,5 @@ bool Graphics::shutdownSDL(SDL_Window *window)
     SDL_DestroyWindow(window);
     // Quit SDL subsystems
     SDL_Quit();
+	return 0;
 }

@@ -8,9 +8,15 @@
 
 using namespace std;
 
-class Drawable{
+class Drawable {
 
     SDL_Surface* image = NULL;
+    int m_rows = 0;
+    int m_columns = 0;
+    Point m_currentFrame = {0,0};
+    SDL_Rect m_clip;
+    
+
     public:
     SDL_Rect spriteRect;
 
@@ -18,43 +24,49 @@ class Drawable{
 
         virtual Point getPos() = 0; //force consistency between graphics position and entity position
 
-        void initializeSprite(const SDL_Surface* _mainSurface)
+        void initializeSprite(const SDL_Surface* _mainSurface, int _rows, int _columns)
         {   
             std::string tmp = getImgPath();
             image = Graphics::loadSurface(_mainSurface, tmp);
-        }
 
-        void updateSprite(SDL_Surface*& mainSurface)
-        {
-            Point currPoint = getPos();
-            // cout << "accessed position " << spriteRect.y <<endl;
-            // Uint32 white = 0xffffffff;
-            // SDL_FillRect(mainSurface, &spriteRect, white);    
-
-            spriteRect.x = currPoint.x;
-            spriteRect.y = currPoint.y;
-            SDL_BlitSurface(image, NULL, mainSurface, &spriteRect);    
-
-    
-        }
-
-        void drawToScreen(SDL_Surface*& mainSurface)
-        {
             if(image == NULL)
             {
                 cout << "Drawable not initialized! img path = "<< getImgPath() << " error = " << SDL_GetError() << endl;
                 return;
             }
-            // use SDL rect to define where the bitmap will be drawn'
-            Point point = getPos();
-            // spriteRect->x = point.x;
-            // spriteRect->y = point.y;
-            // spriteRect->w = image->w;
-            // spriteRect->h = image->h;
-            spriteRect = {point.x, point.y, image->w, image->h};
-            // cout << spriteRect.x << " " << spriteRect.y << endl;
-            SDL_BlitSurface(image, NULL, mainSurface, &spriteRect);    
 
+            m_clip.h = image->h / _rows;
+            m_clip.w = image->w / _columns;
+
+            m_rows = _rows;
+            m_columns = _columns;
+
+            spriteRect = {0, 0, image->w, image->h};
+        }
+
+        void updateSprite(SDL_Surface*& mainSurface)
+        {
+           drawToScreen(mainSurface);
+        }
+
+        void drawToScreen(SDL_Surface*& mainSurface)
+        {
+            Point currPoint = getPos();
+            m_currentFrame.x += 1;
+            m_currentFrame.y += 1;
+            if (m_currentFrame.y >= m_rows) {
+                m_currentFrame.y = 0;
+            }
+            if (m_currentFrame.x >= m_columns) {
+                m_currentFrame.x = 0;
+            }
+
+            m_clip.x = m_currentFrame.x * m_clip.w;
+            m_clip.y = m_currentFrame.y * m_clip.h;
+
+            spriteRect.x = currPoint.x;
+            spriteRect.y = currPoint.y;
+            SDL_BlitSurface(image, &m_clip, mainSurface, &spriteRect);    
         }
 
         void cleanupSprite()

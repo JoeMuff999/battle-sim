@@ -30,11 +30,10 @@ public:
     void start()
     {
         PlayerAgent* pagent = new PlayerAgent(300,200, agents, topLayerDrawables, controllables);
-        pagent->initializeSprite(_mainSurface);
+        pagent->initializeSprite(_mainSurface, 1, 6);
         pagent->drawToScreen(_mainSurface);
-        FriendlyAgent* fagent = new FriendlyAgent(100,200, agents, bottomLayerDrawables);
-        fagent->setTargetAgent(pagent);
-        fagent->initializeSprite(_mainSurface);
+        FlockingAgent* fagent = new FlockingAgent(100,200, agents, bottomLayerDrawables);
+        fagent->initializeSprite(_mainSurface, 1, 8);
         fagent->drawToScreen(_mainSurface);
     }
 
@@ -42,7 +41,7 @@ public:
     {
         bool quit = false;
         //read 1 input per frame, update player then update the agents then update graphics
-        using namespace std::chrono::_V2;
+        using namespace std::chrono;
         steady_clock::time_point lastFrameStartTime = Time::getTime();
         while (!quit)
         {

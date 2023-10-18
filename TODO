@@ -20,4 +20,4 @@ have control for agents be determined by the agent itself. proximity, vision, et
 
 at the moment, we are leaking memory like crazy lol
 
-use pngs instead of bitmaps
+use pngs instead of bitmaps - can keep using your cyan hack as well

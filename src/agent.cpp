@@ -26,3 +26,22 @@ void Agent::pathToTarget(const float frameDeltaTime)
     _position.x = (int)_truePosition.x;
     _position.y = (int)_truePosition.y;
 }
+
+void FlockingAgent::updateHeading()
+{
+    
+}
+
+void FlockingAgent::updateAgent(const float frameDeltaTime)
+{
+    this->updateHeading();
+    float totalMovementForThisFrame = getMoveSpeed() * frameDeltaTime;
+    float x_move = totalMovementForThisFrame * cosf(_heading);
+    float y_move = totalMovementForThisFrame * sinf(_heading);
+    _truePosition.x = _truePosition.x + x_move;
+    _truePosition.y = _truePosition.y + y_move;
+    _position.x = (int)_truePosition.x;
+    _position.y = (int)_truePosition.y;
+}
+        
+ 

@@ -4,12 +4,23 @@
 
 #include <string>
 #include <stdio.h>
-#include <unistd.h>
 #include <queue>
 #include <math.h> 
 /*
     base class from which all other agents inherit their functions
 */
+
+#ifdef _WIN32
+// Windows-specific headers
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+// Linux-specific headers
+#include <unistd.h>
+#include <limits.h>
+#define GetCurrentDir getcwd
+#endif
+
 #ifndef AGENT_HPP
 #define AGENT_HPP
 
@@ -18,7 +29,7 @@ class Agent : public Drawable
 protected:
     Point _position;
     Point _target;
-    floatPoint _truePosition;
+    Vec2D _truePosition;
     float _movementSpeed = 100.0f;
 
 public:
@@ -79,7 +90,7 @@ public:
 
 class PlayerAgent : public Agent, public Controllable
 {
-    string bmp_path = "/sprites/player_agent.bmp";
+    string bmp_path = "/sprites/Idle.bmp";
     float _movementSpeed = 200.0f;
 public:        
     PlayerAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
@@ -103,10 +114,10 @@ public:
         setTarget(mousePosition.x, mousePosition.y);
     }
 
-    const std::string getImgPath()
+    const std::string getImgPath() override
     {
         char cwd[FILENAME_MAX];
-        getcwd(cwd, FILENAME_MAX);
+		GetCurrentDir(cwd, FILENAME_MAX);
 
         std::string currDir(cwd);
         currDir += bmp_path;
@@ -116,20 +127,25 @@ public:
     
 };
 
-class FriendlyAgent : public Agent
+class FlockingAgent : public Agent
 {
-    string bmp_path = "/sprites/friendly_agent.bmp";
-    Agent* _toFollow;
+    string bmp_path = "/sprites/Walk.bmp";
+    //smart pointer please :)
+    vector<Agent*>* _agents;
+    float _heading;
+
 public:        
-    FriendlyAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore) : Agent(x, y) {
+    FlockingAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore) : Agent(x, y) {
         agentStore.push_back(this);
+        _agents = &agentStore;
         drawableStore.push_back(this);
+        _heading = 0.0f;
     }
 
-    const std::string getImgPath()
+    const std::string getImgPath() override
     {
         char cwd[FILENAME_MAX];
-        getcwd(cwd, FILENAME_MAX);
+		GetCurrentDir(cwd, FILENAME_MAX);
 
         std::string currDir(cwd);
         currDir += bmp_path;
@@ -139,18 +155,11 @@ public:
     /*
         TODO: smart pointer please :)
     */
-    void setTargetAgent(Agent* toFollow)
-    {
-        _toFollow = toFollow;
-    }
-    //override: behavior should be following the player, although this will eventually be more in-depth.
-    void updateAgent(const float frameDeltaTime)
-    {
-        Point targetAgentPos = _toFollow->getPos();
-        setTarget(targetAgentPos.x, targetAgentPos.y);
-        pathToTarget(frameDeltaTime);
-    }   
 
+   void updateHeading();
+    
+    //override: behavior should be following the player, although this will eventually be more in-depth.
+    void updateAgent(const float frameDeltaTime);
 };
 
 #endif

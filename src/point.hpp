@@ -11,11 +11,11 @@ struct point{
 
 typedef struct point Point;
 
-struct floatPoint{
+struct Vec2D{
     float x;
     float y;
 };
 
-typedef struct floatPoint FloatPoint;
+typedef struct Vec2D Vec2D;
 
 #endif
