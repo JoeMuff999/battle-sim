@@ -14,6 +14,10 @@
 
 using namespace std;
 
+enum Layer {
+    BACKGROUND, TERRAIN, NPC, PLAYER
+};
+
 struct configRow
 {
     string name;
@@ -34,18 +38,14 @@ typedef struct imageData ImageData;
 
 class Drawable
 {
-
-    ImageData currentImage;
-    Point m_currentFrame = {0, 0};
-
-    map<string, ImageData> mapStateToImage;
-
 public:
     SDL_Rect spriteRect;
 
     virtual const string getImageConfigPath() = 0;
 
     virtual Point getPos() = 0; // force consistency between graphics position and entity position
+
+    virtual Layer getLayer() = 0;
 
     void initializeSprite(const SDL_Surface *_mainSurface)
     {
@@ -119,6 +119,20 @@ public:
         currentImage = mapStateToImage[state];
     }
 
+    void cleanupSprite()
+    {
+        for (const auto& pair : mapStateToImage) {
+            SDL_FreeSurface(pair.second.image);
+        }
+    }
+
+private:
+    ImageData currentImage;
+    Point m_currentFrame = {0, 0};
+    int m_layer;
+
+    map<string, ImageData> mapStateToImage;
+
     vector<ConfigRow> parseConfig(const string &pathToConfig)
     {
         vector<ConfigRow> data;
@@ -154,13 +168,6 @@ public:
 
         file.close();
         return data;
-    }
-
-    void cleanupSprite()
-    {
-        for (const auto& pair : mapStateToImage) {
-            SDL_FreeSurface(pair.second.image);
-        }
     }
 };
 

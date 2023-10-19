@@ -1,6 +1,6 @@
 #include "agent.hpp"
 
-void Agent::pathToTarget(const float frameDeltaTime)
+Point Agent::pathToTarget(const float frameDeltaTime)
 {
     float totalMovementForThisFrame = getMoveSpeed() * frameDeltaTime;
 
@@ -12,12 +12,8 @@ void Agent::pathToTarget(const float frameDeltaTime)
     float mag = sqrt(xx + yy);
     if (mag < totalMovementForThisFrame)
     {
-        setState("Idle");
-        return;
-    }
-    //NOTE: this should be moved
-    setState("Walk");
-   
+        return Point{0,0};
+    }   
 
     float x_norm = x / mag;
     float y_norm = y / mag;
@@ -29,6 +25,8 @@ void Agent::pathToTarget(const float frameDeltaTime)
     _truePosition.y += y_movement;
     _position.x = (int)_truePosition.x;
     _position.y = (int)_truePosition.y;
+
+    return Point{x_movement, y_movement};
 }
 
 void FlockingAgent::updateHeading()
@@ -36,7 +34,7 @@ void FlockingAgent::updateHeading()
     
 }
 
-void FlockingAgent::updateAgent(const float frameDeltaTime)
+Point FlockingAgent::updateAgent(const float frameDeltaTime)
 {
     this->updateHeading();
     float totalMovementForThisFrame = getMoveSpeed() * frameDeltaTime;
@@ -46,6 +44,7 @@ void FlockingAgent::updateAgent(const float frameDeltaTime)
     _truePosition.y = _truePosition.y + y_move;
     _position.x = (int)_truePosition.x;
     _position.y = (int)_truePosition.y;
+    return Point{x_move, y_move};
 }
         
  

@@ -6,6 +6,7 @@
 #include "graphics.hpp"
 #include "time.hpp"
 #include "InputManager.hpp"
+#include "drawableLinkedList.hpp"
 
 #ifndef GAME_HPP
 #define GAME_HPP
@@ -15,8 +16,7 @@ class Game
     SDL_Window *_gameWindow;
     SDL_Surface *_mainSurface;
     vector<Agent*> agents;
-    vector<Drawable*> topLayerDrawables;
-    vector<Drawable*> bottomLayerDrawables;
+    LayeredDrawableList drawables;
     vector<Controllable*> controllables;
 
 public:
@@ -29,10 +29,10 @@ public:
     //initialize all of the gameobjects, do drawing, etc
     void start()
     {
-        PlayerAgent* pagent = new PlayerAgent(300,200, agents, topLayerDrawables, controllables);
+        PlayerAgent* pagent = new PlayerAgent(300,200, agents, drawables, controllables);
         pagent->initializeSprite(_mainSurface);
         pagent->drawToScreen(_mainSurface);
-        FlockingAgent* fagent = new FlockingAgent(100,200, agents, bottomLayerDrawables);
+        FlockingAgent* fagent = new FlockingAgent(100,200, agents, drawables);
         fagent->initializeSprite(_mainSurface);
         fagent->drawToScreen(_mainSurface);
     }
@@ -73,23 +73,13 @@ public:
         SDL_FillRect(_mainSurface, NULL, SDL_MapRGB(_mainSurface->format, 0x77, 0x77, 0x77));
 
         //update graphics
-        for(Drawable* drawable : bottomLayerDrawables)
-        {
-            drawable->updateSprite(_mainSurface);
-        }
-        for(Drawable* drawable : topLayerDrawables)
-        {
-            drawable->updateSprite(_mainSurface);
-        }
+        drawables.renderAll(_mainSurface);
         SDL_UpdateWindowSurface(_gameWindow);
     }
 
     void cleanup()
     {
-        for (int i = 0; i < agents.size(); i++)
-        {
-            agents[i]->cleanupSprite();
-        }
+        drawables.cleanupAll();
     }
 };
 

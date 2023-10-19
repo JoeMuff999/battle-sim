@@ -2,6 +2,7 @@
 #include "drawable.hpp"
 #include "controllable.hpp"
 #include "pathHelper.hpp"
+#include "drawableLinkedList.hpp"
 
 #include <string>
 #include <stdio.h>
@@ -14,7 +15,7 @@
 #ifndef AGENT_HPP
 #define AGENT_HPP
 
-class Agent : public Drawable
+class Agent
 {
 protected:
     Point _position;
@@ -30,32 +31,15 @@ public:
         _truePosition.y = y;
         _target = {x, y};
     }
-    Agent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore)
-    {
-        _position ={x,y};
-        _truePosition.x = x;
-        _truePosition.y = y;
-        _target = {x, y};
-        agentStore.push_back(this);
-        drawableStore.push_back(this);
-    }
-    const std::string getImageConfigPath()
-    {
-        string dummy;
-        return dummy;
-    }
-    Point getPos()
-    {
-        return _position;
-    }
+
     void setPos(Point point)
     {
         _position = point;
     }
-    //should update the agent's internal position
-    virtual void updateAgent(const float frameDeltaTime)
+    //should update the agent's internal position, returns the continuous change in position
+    virtual Point updateAgent(const float frameDeltaTime)
     {
-        pathToTarget(frameDeltaTime);
+        return pathToTarget(frameDeltaTime);
     }
     /*
         allow derived classes to define their own movement speed
@@ -65,7 +49,7 @@ public:
         return _movementSpeed;
     }
 
-    void pathToTarget(const float frameDeltaTime);
+    Point pathToTarget(const float frameDeltaTime);
 
     void setTarget(int x, int y)
     {
@@ -78,15 +62,22 @@ public:
     }
 };
 
-class PlayerAgent : public Agent, public Controllable
+class PlayerAgent : public Agent, public Controllable, public Drawable
 {
     string cfg_path = "/config/warrior";
     float _movementSpeed = 200.0f;
+
+    const Layer m_layer = Layer::PLAYER;
 public:        
-    PlayerAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
+    PlayerAgent(int x, int y, vector<Agent*>& agentStore, LayeredDrawableList& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
         controllables.push_back(this);
         agentStore.push_back(this);
-        drawableStore.push_back(this);
+        drawableStore.insert(this);
+    }
+
+    Point getPos() override
+    {
+        return _position;
     }
 
     float getMoveSpeed()
@@ -94,9 +85,15 @@ public:
         return _movementSpeed;
     }
 
-    void updateAgent(const float frameDeltaTime)
+    Point updateAgent(const float frameDeltaTime) override
     {
-        Agent::updateAgent(frameDeltaTime);
+        Point totalMovement = Agent::updateAgent(frameDeltaTime);
+        if(abs(totalMovement.x) > 0.0f || abs(totalMovement.y) > 0.0f) {
+            setState("Walk");
+        } else {
+            setState("Idle");
+        }
+        return totalMovement;
     }
 
     void handleInput(SDL_Event& e, Point& mousePosition)
@@ -108,22 +105,35 @@ public:
     {
         return PathHelper::generatePath(cfg_path);
     }
+
+    Layer getLayer() override {
+        return m_layer;
+    }
+
     
 };
 
-class FlockingAgent : public Agent
+class FlockingAgent : public Agent, public Drawable
 {
     string cfg_path = "/config/warrior";
     //smart pointer please :)
     vector<Agent*>* _agents;
     float _heading;
 
+    const Layer m_layer = Layer::NPC;
+
+
 public:        
-    FlockingAgent(int x, int y, vector<Agent*>& agentStore, vector<Drawable*>& drawableStore) : Agent(x, y) {
+    FlockingAgent(int x, int y, vector<Agent*>& agentStore, LayeredDrawableList& drawableStore) : Agent(x, y) {
         agentStore.push_back(this);
         _agents = &agentStore;
-        drawableStore.push_back(this);
+        drawableStore.insert(this);
         _heading = 0.0f;
+    }
+
+    Point getPos() override
+    {
+        return _position;
     }
 
     const std::string getImageConfigPath() override
@@ -134,10 +144,14 @@ public:
         TODO: smart pointer please :)
     */
 
-   void updateHeading();
+    void updateHeading();
     
     //override: behavior should be following the player, although this will eventually be more in-depth.
-    void updateAgent(const float frameDeltaTime);
+    Point updateAgent(const float frameDeltaTime) override;
+
+    Layer getLayer() override {
+        return m_layer;
+    }
 };
 
 #endif

@@ -23,3 +23,5 @@ at the moment, we are leaking memory like crazy lol
 use pngs instead of bitmaps - can keep using your cyan hack as well
 
 Fix issue where player sometimes doesn't render
+
+remove drawable from the base agent class. doesn't make sense check!
