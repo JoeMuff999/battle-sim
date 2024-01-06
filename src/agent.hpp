@@ -37,7 +37,7 @@ public:
         _position = point;
     }
     //should update the agent's internal position, returns the continuous change in position
-    virtual Point updateAgent(const float frameDeltaTime)
+    virtual Vec2D updateAgent(const float frameDeltaTime)
     {
         return pathToTarget(frameDeltaTime);
     }
@@ -49,7 +49,7 @@ public:
         return _movementSpeed;
     }
 
-    Point pathToTarget(const float frameDeltaTime);
+    Vec2D pathToTarget(const float frameDeltaTime);
 
     void setTarget(int x, int y)
     {
@@ -85,9 +85,9 @@ public:
         return _movementSpeed;
     }
 
-    Point updateAgent(const float frameDeltaTime) override
+    Vec2D updateAgent(const float frameDeltaTime) override
     {
-        Point totalMovement = Agent::updateAgent(frameDeltaTime);
+        Vec2D totalMovement = Agent::updateAgent(frameDeltaTime);
         if(abs(totalMovement.x) > 0.0f || abs(totalMovement.y) > 0.0f) {
             setState("Walk");
         } else {
@@ -147,7 +147,7 @@ public:
     void updateHeading();
     
     //override: behavior should be following the player, although this will eventually be more in-depth.
-    Point updateAgent(const float frameDeltaTime) override;
+    Vec2D updateAgent(const float frameDeltaTime) override;
 
     Layer getLayer() override {
         return m_layer;

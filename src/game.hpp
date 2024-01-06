@@ -7,6 +7,7 @@
 #include "time.hpp"
 #include "InputManager.hpp"
 #include "drawableLinkedList.hpp"
+#include "background.hpp"
 
 #ifndef GAME_HPP
 #define GAME_HPP
@@ -35,6 +36,9 @@ public:
         FlockingAgent* fagent = new FlockingAgent(100,200, agents, drawables);
         fagent->initializeSprite(_mainSurface);
         fagent->drawToScreen(_mainSurface);
+        Background* background = new Background(drawables);
+        background->initializeSprite(_mainSurface);
+        background->drawToScreen(_mainSurface);
     }
 
     void mainLoop()
