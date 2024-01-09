@@ -36,6 +36,7 @@ public:
                 }
             } else {
                 newNode->prev = current;
+                newNode->next = current->next;
                 current->next = newNode;
             }
         }

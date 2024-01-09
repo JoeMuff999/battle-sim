@@ -5,7 +5,7 @@
 #include "pathHelper.hpp"
 
 class Background : public Drawable {
-    const string CONFIG_PATH = "/config/forest";
+    const string CONFIG_PATH = "/config/bridge";
     const Layer RENDER_LAYER = Layer::BACKGROUND;
 public: 
     Background(LayeredDrawableList& drawableStore) {

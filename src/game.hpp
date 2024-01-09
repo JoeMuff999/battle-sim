@@ -8,6 +8,7 @@
 #include "InputManager.hpp"
 #include "drawableLinkedList.hpp"
 #include "background.hpp"
+#include "wall.hpp"
 
 #ifndef GAME_HPP
 #define GAME_HPP
@@ -19,6 +20,7 @@ class Game
     vector<Agent*> agents;
     LayeredDrawableList drawables;
     vector<Controllable*> controllables;
+    vector<StaticCollidable*> staticCollidables;
 
 public:
     Game(SDL_Window *&gameWindow, SDL_Surface *&mainSurface)
@@ -30,7 +32,10 @@ public:
     //initialize all of the gameobjects, do drawing, etc
     void start()
     {
-        PlayerAgent* pagent = new PlayerAgent(300,200, agents, drawables, controllables);
+        Wall* wall = new Wall(0 ,390-55-10, 1920, 10);
+        staticCollidables.push_back(wall);
+
+        PlayerAgent* pagent = new PlayerAgent(0,500, {40, 55}, {28, 50}, agents, drawables, controllables);
         pagent->initializeSprite(_mainSurface);
         pagent->drawToScreen(_mainSurface);
         FlockingAgent* fagent = new FlockingAgent(100,200, agents, drawables);
@@ -72,7 +77,7 @@ public:
         //update agents
         for(Agent* agent : agents)
         {
-            agent->updateAgent(previousFrameStartTime);
+            agent->updateAgent(previousFrameStartTime, staticCollidables);
         }
         SDL_FillRect(_mainSurface, NULL, SDL_MapRGB(_mainSurface->format, 0x77, 0x77, 0x77));
 

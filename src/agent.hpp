@@ -3,6 +3,7 @@
 #include "controllable.hpp"
 #include "pathHelper.hpp"
 #include "drawableLinkedList.hpp"
+#include "collidable.hpp"
 
 #include <string>
 #include <stdio.h>
@@ -26,7 +27,7 @@ protected:
 public:
     Agent(int x, int y)
     {
-        _position ={x,y};
+        _position = {x,y};
         _truePosition.x = x;
         _truePosition.y = y;
         _target = {x, y};
@@ -37,7 +38,7 @@ public:
         _position = point;
     }
     //should update the agent's internal position, returns the continuous change in position
-    virtual Vec2D updateAgent(const float frameDeltaTime)
+    virtual Vec2D updateAgent(const float frameDeltaTime, const vector<StaticCollidable*> staticCollidables)
     {
         return pathToTarget(frameDeltaTime);
     }
@@ -62,22 +63,29 @@ public:
     }
 };
 
-class PlayerAgent : public Agent, public Controllable, public Drawable
+class PlayerAgent : public Agent, public Controllable, public Drawable, public MovingCollidable
 {
     string cfg_path = "/config/warrior";
     float _movementSpeed = 200.0f;
 
     const Layer m_layer = Layer::PLAYER;
 public:        
-    PlayerAgent(int x, int y, vector<Agent*>& agentStore, LayeredDrawableList& drawableStore, vector<Controllable*>& controllables) : Agent(x, y) {
+    PlayerAgent(int x, int y, Vec2D bounds, Vec2D offset, vector<Agent*>& agentStore, LayeredDrawableList& drawableStore, vector<Controllable*>& controllables) : Agent(x, y), MovingCollidable(bounds.x, bounds.y, offset) {
         controllables.push_back(this);
         agentStore.push_back(this);
         drawableStore.insert(this);
     }
 
+    //overrides method in drawable
     Point getPos() override
     {
+        // printf("PlayerAgent::getPos - Player Coords = (%d, %d)\n", _position.x, _position.y);
         return _position;
+    }
+
+    //overrides method in collidable
+    Vec2D getTruePosition() const override {
+        return _truePosition;
     }
 
     float getMoveSpeed()
@@ -85,9 +93,20 @@ public:
         return _movementSpeed;
     }
 
-    Vec2D updateAgent(const float frameDeltaTime) override
+    Vec2D updateAgent(const float frameDeltaTime, const vector<StaticCollidable*> staticCollidables) override
     {
-        Vec2D totalMovement = Agent::updateAgent(frameDeltaTime);
+        Point save_pos = _position;
+        Vec2D save_true = _truePosition;
+        Vec2D totalMovement = Agent::updateAgent(frameDeltaTime, staticCollidables);
+        //if we collide just reset the movement
+        // printf("PlayerAgent::updateAgent - Player Coords = (%f, %f)\n", _truePosition.x, _truePosition.y);
+        for (StaticCollidable* curr : staticCollidables) {
+            if(isColliding(*curr)) {
+                _position = save_pos;
+                _truePosition = save_true;
+                break;
+            }
+        }
         if(abs(totalMovement.x) > 0.0f || abs(totalMovement.y) > 0.0f) {
             setState("Walk");
         } else {
@@ -133,6 +152,7 @@ public:
 
     Point getPos() override
     {
+        // printf("FlockingAgent::getPos - Player Coords = (%d, %d)\n", _position.x, _position.y);
         return _position;
     }
 
@@ -147,7 +167,7 @@ public:
     void updateHeading();
     
     //override: behavior should be following the player, although this will eventually be more in-depth.
-    Vec2D updateAgent(const float frameDeltaTime) override;
+    Vec2D updateAgent(const float frameDeltaTime, const vector<StaticCollidable*> staticCollidables) override;
 
     Layer getLayer() override {
         return m_layer;

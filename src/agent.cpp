@@ -10,7 +10,8 @@ Vec2D Agent::pathToTarget(const float frameDeltaTime)
     float yy = y * y;
 
     float mag = sqrt(xx + yy);
-    if (mag < totalMovementForThisFrame)
+    // printf("Agent::pathToTarget - Mag = %f\n", mag);
+    if (mag < totalMovementForThisFrame || mag == 0.0f)
     {
         return Vec2D{0,0};
     }   
@@ -34,7 +35,7 @@ void FlockingAgent::updateHeading()
     
 }
 
-Vec2D FlockingAgent::updateAgent(const float frameDeltaTime)
+Vec2D FlockingAgent::updateAgent(const float frameDeltaTime, const std::vector<StaticCollidable*> _)
 {
     this->updateHeading();
     float totalMovementForThisFrame = getMoveSpeed() * frameDeltaTime;
