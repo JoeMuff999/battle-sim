@@ -1,4 +1,4 @@
 State,ImagePath,NumSprites
-Idle,/sprites/Idle.bmp,6
-Walk,/sprites/Walk.bmp,8
+Idle,/sprites/Idle_shadow.bmp,6
+Walk,/sprites/Walk_shadow.bmp,8
 Jump,/sprites/Jump.bmp,8
